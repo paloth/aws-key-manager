@@ -1,5 +1,5 @@
 /*
-Copyright © 2020 NAME HERE <EMAIL ADDRESS>
+Copyright © 2020 Paloth
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,35 +17,69 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
+
+var userName string
+var token string
+var profile string
 
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
 	Use:   "generate",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Generate a temporary acces key with mfa",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("generate called")
+		run()
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(generateCmd)
+	generateCmd.Flags().StringVarP(&userName, "username", "u", "", "The AWS user name")
+	generateCmd.Flags().StringVarP(&profile, "profile", "p", "", "The AWS user profile")
+	generateCmd.Flags().StringVarP(&token, "token", "t", "", "The user token")
 
-	// Here you will define your flags and configuration settings.
+	generateCmd.MarkFlagRequired("username")
+	generateCmd.MarkFlagRequired("token")
+	generateCmd.MarkFlagRequired("profile")
+}
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// generateCmd.PersistentFlags().String("foo", "", "A help for foo")
+const (
+	credentialFile string = "/.aws/credentials"
+)
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// generateCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+var (
+	home        string
+	profileList []string
+)
+
+func run() {
+	profile.getConfig()
+	getConfig()
+}
+
+func getHomeValue(h *string) {
+	var err error
+	*h, err = os.UserHomeDir()
+	if err != nil {
+		fmt.Println("Error: ", err)
+		os.Exit(2)
+	}
+}
+
+func getConfig() {
+	getHomeValue(&home)
+	viper.SetConfigFile("awsProfile")
+	viper.SetConfigType("toml")
+	viper.AddConfigPath(home + credentialFile)
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(fmt.Errorf("%s", err))
+	}
+
+	viper.Get("")
 }
