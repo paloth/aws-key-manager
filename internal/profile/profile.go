@@ -3,12 +3,13 @@ package profile
 import (
 	"fmt"
 	"os"
+	"strings"
 
-	"github.com/spf13/viper"
+	"github.com/bigkevmcd/go-configparser"
 )
 
 const (
-	credentialFile string = "/.aws/credentials"
+	credentialFile string = "/.aws/"
 )
 
 var (
@@ -25,18 +26,41 @@ func getHomeValue(h *string) {
 	}
 }
 
-func GetConfig() {
+func GetConfig() configparser.ConfigParser {
 	getHomeValue(&home)
 
-	filePath := home + credentialFile
-	viper.SetConfigFile("awsProfile")
-	viper.SetConfigType("toml")
-	viper.AddConfigPath(filePath)
-
-	err := viper.ReadInConfig()
+	config, err := configparser.NewConfigParserFromFile(home + credentialFile)
 	if err != nil {
-		panic(fmt.Errorf("%s", err))
+		panic(fmt.Errorf("Error: %s", err))
+		os.Exit(2)
 	}
+	return *config
+}
 
-	viper.Get("")
+func removeBadProfile(list *configparser.ConfigParser) []string {
+	var listProfile []string
+
+	for i := 0; i < len(list.Sections()); i++ {
+		flag, err := list.HasOption(list.Sections()[i], "aws_access_key_id")
+		if err != nil {
+			fmt.Println(err)
+		}
+		if flag == true && !strings.HasSuffix(list.Sections()[i], "-tmp") {
+			listProfile = append(listProfile, list.Sections()[i])
+		}
+
+	}
+	return listProfile
+}
+
+func CheckProfile(profile string, config *configparser.ConfigParser) error {
+	if exists := config.HasSection(profile); exists {
+		return nil
+	}
+	return fmt.Errorf("The profile is not present in your configuration file")
+}
+
+// Main function
+func Main() {
+	println("Profile")
 }
