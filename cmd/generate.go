@@ -23,14 +23,18 @@ package cmd
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/paloth/aws-key-manager/internal/profile"
 	"github.com/spf13/cobra"
 )
 
-var userName string
-var userToken string
-var userProfile string
+var (
+	userName    string
+	userToken   string
+	userProfile string
+	reToken     = regexp.MustCompile(`\d{6}`)
+)
 
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
@@ -59,7 +63,21 @@ func init() {
 	generateCmd.MarkFlagRequired("profile")
 }
 
+func checkToken(userToken string) error {
+
+	if match := reToken.MatchString(userToken); match {
+		return nil
+	}
+	return fmt.Errorf("The token %s must be composed by six digits")
+}
+
 func run() {
-	fmt.Println("yo")
-	profile.GetConfig()
+	err := checkToken(userToken)
+	if err != nil {
+		fmt.Errorf("Error: %s", err)
+	}
+	config := profile.GetConfig()
+	profile.CheckProfile(userProfile, config)
+	profile.Main()
+	// config := profile.GetConfig()
 }
