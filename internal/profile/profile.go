@@ -25,11 +25,13 @@ func getHomeValue(h *string) {
 	}
 }
 
-func getConfig() {
+func GetConfig() {
 	getHomeValue(&home)
+
+	filePath := home + credentialFile
 	viper.SetConfigFile("awsProfile")
 	viper.SetConfigType("toml")
-	viper.AddConfigPath(home + credentialFile)
+	viper.AddConfigPath(filePath)
 
 	err := viper.ReadInConfig()
 	if err != nil {
