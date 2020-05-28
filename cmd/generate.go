@@ -38,13 +38,7 @@ var (
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
 	Use:   "generate",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Generate a temporary token",
 	Run: func(cmd *cobra.Command, args []string) {
 		run()
 	},
@@ -53,9 +47,9 @@ to quickly create a Cobra application.`,
 func init() {
 	rootCmd.AddCommand(generateCmd)
 
-	generateCmd.Flags().StringVarP(&userName, "username", "u", "", "The AWS user name")
-	generateCmd.Flags().StringVarP(&userProfile, "profile", "p", "", "The AWS user profile")
-	generateCmd.Flags().StringVarP(&userToken, "token", "t", "", "The user token")
+	generateCmd.Flags().StringVarP(&userName, "username", "u", "", "AWS user name")
+	generateCmd.Flags().StringVarP(&userProfile, "profile", "p", "", "AWS user profile (Must be in the aws credentials file)")
+	generateCmd.Flags().StringVarP(&userToken, "token", "t", "", "User's token (Composed by 6 digits)")
 
 	generateCmd.MarkFlagRequired("username")
 	generateCmd.MarkFlagRequired("token")
