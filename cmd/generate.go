@@ -23,17 +23,16 @@ package cmd
 
 import (
 	"fmt"
-	"regexp"
 
-	"github.com/paloth/aws-key-manager/internal/profile"
+	"github.com/paloth/aws-key-manager/internal/users"
 	"github.com/spf13/cobra"
 )
 
 var (
-	userName    string
-	userToken   string
-	userProfile string
-	reToken     = regexp.MustCompile(`\d{6}`)
+	name    string
+	token   string
+	profile string
+	user    users.Users
 )
 
 // generateCmd represents the generate command
@@ -47,6 +46,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		user.Init(name, profile, token)
 		run()
 	},
 }
@@ -54,30 +54,19 @@ to quickly create a Cobra application.`,
 func init() {
 	rootCmd.AddCommand(generateCmd)
 
-	generateCmd.Flags().StringVarP(&userName, "username", "u", "", "The AWS user name")
-	generateCmd.Flags().StringVarP(&userProfile, "profile", "p", "", "The AWS user profile")
-	generateCmd.Flags().StringVarP(&userToken, "token", "t", "", "The user token")
+	generateCmd.Flags().StringVarP(&name, "username", "u", "", "The AWS user name")
+	generateCmd.Flags().StringVarP(&profile, "profile", "p", "", "The AWS user profile")
+	generateCmd.Flags().StringVarP(&token, "token", "t", "", "The user token")
 
 	generateCmd.MarkFlagRequired("username")
 	generateCmd.MarkFlagRequired("token")
 	generateCmd.MarkFlagRequired("profile")
 }
 
-func checkToken(userToken string) error {
-
-	if match := reToken.MatchString(userToken); match {
-		return nil
-	}
-	return fmt.Errorf("The token %s must be composed by six digits")
-}
-
 func run() {
-	err := checkToken(userToken)
+
+	err := user.CheckToken()
 	if err != nil {
-		fmt.Errorf("Error: %s", err)
+		fmt.Printf("Input error: %s", err)
 	}
-	config := profile.GetConfig()
-	profile.CheckProfile(userProfile, config)
-	profile.Main()
-	// config := profile.GetConfig()
 }
