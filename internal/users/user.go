@@ -6,9 +6,9 @@ import (
 )
 
 type Users struct {
-	name    string
-	profile string
-	token   string
+	Name    string
+	Profile string
+	Token   string
 }
 
 var (
@@ -16,14 +16,14 @@ var (
 )
 
 func (u *Users) Init(name string, profile string, token string) {
-	u.name = name
-	u.profile = profile
-	u.token = token
+	u.Name = name
+	u.Profile = profile
+	u.Token = token
 }
 
 func (u *Users) CheckToken() error {
-	if reToken.MatchString(u.token) {
+	if reToken.MatchString(u.Token) {
 		return nil
 	}
-	return fmt.Errorf("The token %s must be composed by six digits", u.token)
+	return fmt.Errorf("The token %s must be composed by six digits", u.Token)
 }
