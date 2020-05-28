@@ -41,24 +41,6 @@ func getConfig() configparser.ConfigParser {
 
 }
 
-func removeBadProfile(list *configparser.ConfigParser) []string {
-
-	var listProfile []string
-
-	for i := 0; i < len(list.Sections()); i++ {
-		flag, err := list.HasOption(list.Sections()[i], "aws_access_key_id")
-		if err != nil {
-			fmt.Println(err)
-		}
-		if flag == true && !strings.HasSuffix(list.Sections()[i], "-tmp") {
-			listProfile = append(listProfile, list.Sections()[i])
-		}
-
-	}
-	return listProfile
-
-}
-
 func CheckProfile(profile string) error {
 
 	config := getConfig()
