@@ -24,15 +24,15 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/paloth/aws-key-manager/internal/profile"
 	"github.com/paloth/aws-key-manager/internal/users"
 	"github.com/spf13/cobra"
 )
 
 var (
-	name    string
-	token   string
-	profile string
-	user    users.Users
+	userName    string
+	userToken   string
+	userProfile string
 )
 
 // generateCmd represents the generate command
@@ -46,7 +46,6 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		user.Init(name, profile, token)
 		run()
 	},
 }
@@ -54,9 +53,9 @@ to quickly create a Cobra application.`,
 func init() {
 	rootCmd.AddCommand(generateCmd)
 
-	generateCmd.Flags().StringVarP(&name, "username", "u", "", "The AWS user name")
-	generateCmd.Flags().StringVarP(&profile, "profile", "p", "", "The AWS user profile")
-	generateCmd.Flags().StringVarP(&token, "token", "t", "", "The user token")
+	generateCmd.Flags().StringVarP(&userName, "username", "u", "", "The AWS user name")
+	generateCmd.Flags().StringVarP(&userProfile, "profile", "p", "", "The AWS user profile")
+	generateCmd.Flags().StringVarP(&userToken, "token", "t", "", "The user token")
 
 	generateCmd.MarkFlagRequired("username")
 	generateCmd.MarkFlagRequired("token")
@@ -64,8 +63,18 @@ func init() {
 }
 
 func run() {
+	user := users.Users{
+		Name:    userName,
+		Token:   userToken,
+		Profile: userProfile,
+	}
 
 	err := user.CheckToken()
+	if err != nil {
+		fmt.Printf("Input error: %s", err)
+	}
+
+	err = profile.CheckProfile(user.Profile)
 	if err != nil {
 		fmt.Printf("Input error: %s", err)
 	}
