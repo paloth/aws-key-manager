@@ -25,51 +25,65 @@ import (
 	"fmt"
 
 	"github.com/paloth/aws-key-manager/internal/profile"
-	"github.com/paloth/aws-key-manager/internal/users"
 	"github.com/spf13/cobra"
-)
-
-var (
-	userName    string
-	userToken   string
-	userProfile string
 )
 
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
 	Use:   "generate",
 	Short: "Generate a temporary token",
-	Run: func(cmd *cobra.Command, args []string) {
-		run()
-	},
+	RunE:  run,
 }
 
 func init() {
 	rootCmd.AddCommand(generateCmd)
 
-	generateCmd.Flags().StringVarP(&userName, "username", "u", "", "AWS user name")
-	generateCmd.Flags().StringVarP(&userProfile, "profile", "p", "", "AWS user profile (Must be in the aws credentials file)")
-	generateCmd.Flags().StringVarP(&userToken, "token", "t", "", "User's token (Composed by 6 digits)")
+	generateCmd.Flags().StringP("username", "u", "", "AWS user name")
+	generateCmd.Flags().StringP("profile", "p", "", "AWS user profile (Must be in the aws credentials file)")
+	generateCmd.Flags().StringP("token", "t", "", "User's token (Composed by 6 digits)")
 
 	generateCmd.MarkFlagRequired("username")
 	generateCmd.MarkFlagRequired("token")
 	generateCmd.MarkFlagRequired("profile")
 }
 
-func run() {
-	user := users.Users{
-		Name:    userName,
-		Token:   userToken,
-		Profile: userProfile,
+func run(cmd *cobra.Command, args []string) error {
+
+	//Check user name entry
+	userName, err := cmd.Flags().GetString("username")
+	if err != nil {
+		return err
+	}
+	if userName == "" {
+		return fmt.Errorf("User name cannot be empty! Please provide a user name")
 	}
 
-	err := user.CheckToken()
+	//Check token entry
+	userToken, err := cmd.Flags().GetString("token")
 	if err != nil {
-		fmt.Printf("Input error: %s", err)
+		return err
+	}
+	err = profile.CheckToken(userToken)
+	if err != nil {
+		return err
 	}
 
-	err = profile.CheckProfile(user.Profile)
+	//Check profile entry
+	userProfile, err := cmd.Flags().GetString("profile")
 	if err != nil {
-		fmt.Printf("Input error: %s", err)
+		return err
 	}
+	err = profile.CheckProfile(userProfile)
+	if err != nil {
+		return err
+	}
+
+	session := profile.GetAwsSession(userProfile, userName, userToken)
+
+	err = profile.WriteConfigFile(userProfile, &session)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
