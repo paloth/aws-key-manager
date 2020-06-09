@@ -1,11 +1,4 @@
-all: say_hello generate
-
-say_hello:
-		@echo "Start build..."
+all: build
 
 build:
-		@echo "Building exec"
-		go build main.go
-
-clean:
-		@echo "Cleaning up..."
+		go build -trimpath -o bin/akm ./main.go
