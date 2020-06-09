@@ -15,10 +15,9 @@ const (
 )
 
 var (
-	home        string
+	home        *string
 	config      *configparser.ConfigParser
 	profileList []string
-	err         error
 	reToken     = regexp.MustCompile(`[0-9]{6}`)
 )
 
@@ -29,27 +28,32 @@ func CheckToken(token string) error {
 	return fmt.Errorf("The token %s must be composed by six digits", token)
 }
 
-func getHomeValue(h *string) {
-	*h, err = os.UserHomeDir()
+func getHomeValue() (*string, error) {
+	home, err := os.UserHomeDir()
 	if err != nil {
-		fmt.Println("Error: ", err)
-		os.Exit(2)
+		return nil, err
 	}
+	return &home, nil
 }
 
-func getConfig() *configparser.ConfigParser {
-	getHomeValue(&home)
-
-	cfg, err := configparser.NewConfigParserFromFile(home + credentialFile)
+func getConfig() (*configparser.ConfigParser, error) {
+	home, err := getHomeValue()
 	if err != nil {
-		fmt.Printf("Error: %s", err)
-		os.Exit(2)
+		return nil, err
 	}
-	return cfg
+
+	cfg, err := configparser.NewConfigParserFromFile(*home + credentialFile)
+	if err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
 func CheckProfile(profile string) error {
-	config = getConfig()
+	config, err := getConfig()
+	if err != nil {
+		return err
+	}
 
 	if exists := config.HasSection(profile); exists {
 		flag, err := config.HasOption(profile, "aws_access_key_id")
@@ -65,25 +69,24 @@ func CheckProfile(profile string) error {
 }
 
 func WriteConfigFile(profile string, session *sts.GetSessionTokenOutput) error {
-	if exists := config.HasSection(profile + "-tmp"); exists {
-		config.Set(profile+"-tmp", "aws_access_key_id", *session.Credentials.AccessKeyId)
-		config.Set(profile+"-tmp", "aws_secret_access_key", *session.Credentials.SecretAccessKey)
-		config.Set(profile+"-tmp", "aws_session_token", *session.Credentials.SessionToken)
-		config.Set(profile+"-tmp", "aws_default_region", "eu-west-1")
-	} else {
+	if exists := !config.HasSection(profile + "-tmp"); exists {
 		fmt.Println("Profile " + profile + "-tmp does not exists.")
 		config.AddSection(profile + "-tmp")
 		fmt.Println("Profile " + profile + "-tmp has been created.")
-		config.Set(profile+"-tmp", "aws_access_key_id", *session.Credentials.AccessKeyId)
-		config.Set(profile+"-tmp", "aws_secret_access_key", *session.Credentials.SecretAccessKey)
-		config.Set(profile+"-tmp", "aws_session_token", *session.Credentials.SessionToken)
-		config.Set(profile+"-tmp", "aws_default_region", "eu-west-1")
 	}
+	//Set new profile values in ConfigParser
+	config.Set(profile+"-tmp", "aws_access_key_id", *session.Credentials.AccessKeyId)
+	config.Set(profile+"-tmp", "aws_secret_access_key", *session.Credentials.SecretAccessKey)
+	config.Set(profile+"-tmp", "aws_session_token", *session.Credentials.SessionToken)
+	config.Set(profile+"-tmp", "aws_default_region", "eu-west-1")
 
-	err := config.SaveWithDelimiter(home+credentialFile, "=")
+	//Write profile in file
+	err := config.SaveWithDelimiter(*home+credentialFile, "=")
 	if err != nil {
 		return err
 	}
+
+	fmt.Println("The profile " + profile + "-tmp has been set up and will expire on " + session.Credentials.Expiration.Format("Mon Jan 2") + " at " + session.Credentials.Expiration.Format("15:04:05"))
 
 	return nil
 }
