@@ -37,7 +37,7 @@ func init() {
 	rootCmd.AddCommand(generateCmd)
 
 	generateCmd.Flags().StringP("username", "u", "", "AWS user name")
-	generateCmd.Flags().StringP("profile", "p", "", "AWS user profile (Must be in the aws credentials file)")
+	generateCmd.Flags().StringP("profile", "p", "default", "AWS user profile (Must be in the aws credentials file)")
 	generateCmd.Flags().StringP("token", "t", "", "User's token (Composed by 6 digits)")
 
 	generateCmd.MarkFlagRequired("username")
