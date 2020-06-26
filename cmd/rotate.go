@@ -42,5 +42,8 @@ func init() {
 }
 
 func runRotate(cmd *cobra.Command, args []string) error {
-// 
+	// TODO: check the access key age and display key age
+	// TODO: check flag -y if not prompt validation
+	// TODO: execute operation to change key
+	return nil
 }
