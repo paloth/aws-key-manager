@@ -22,8 +22,6 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/paloth/aws-key-manager/internal/profile"
 	"github.com/spf13/cobra"
 )
@@ -53,9 +51,6 @@ func run(cmd *cobra.Command, args []string) error {
 	userName, err := cmd.Flags().GetString("username")
 	if err != nil {
 		return err
-	}
-	if userName == "" {
-		return fmt.Errorf("User name cannot be empty! Please provide a user name")
 	}
 
 	//Check token entry

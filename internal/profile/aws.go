@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/sts"
 )
 
+//GetAwsSession get temporary token from user parameters
 func GetAwsSession(profile string, user string, token string) sts.GetSessionTokenOutput {
 	awsSession, err := session.NewSessionWithOptions(session.Options{
 		Profile: profile,
@@ -18,6 +19,7 @@ func GetAwsSession(profile string, user string, token string) sts.GetSessionToke
 			fmt.Println(awsErr)
 		}
 	}
+
 	svcSts := sts.New(awsSession)
 
 	identity, err := svcSts.GetCallerIdentity(&sts.GetCallerIdentityInput{})
@@ -37,5 +39,6 @@ func GetAwsSession(profile string, user string, token string) sts.GetSessionToke
 			fmt.Println(awsErr)
 		}
 	}
+
 	return *session
 }

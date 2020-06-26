@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/spf13/cobra"
@@ -9,11 +8,11 @@ import (
 )
 
 func TestGenerate(t *testing.T) {
+	// result := run(cmd, []string{})
+	// assert.Error(t, result)
 	cmd := &cobra.Command{}
 
-	result := run(cmd, []string{"user"})
+	result := run(cmd, []string{})
+	t.Logf("%s", result)
 	assert.Error(t, result)
-
-	result = run(cmd, []string{""})
-	assert.Equal(t, result, fmt.Errorf("User name cannot be empty! Please provide a user name"))
 }
