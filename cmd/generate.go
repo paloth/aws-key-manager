@@ -30,7 +30,7 @@ import (
 var generateCmd = &cobra.Command{
 	Use:   "generate",
 	Short: "Generate a temporary token",
-	RunE:  run,
+	RunE:  runGenerate,
 }
 
 func init() {
@@ -45,7 +45,7 @@ func init() {
 	generateCmd.MarkFlagRequired("profile")
 }
 
-func run(cmd *cobra.Command, args []string) error {
+func runGenerate(cmd *cobra.Command, args []string) error {
 
 	//Check user name entry
 	userName, err := cmd.Flags().GetString("username")
