@@ -44,7 +44,6 @@ func init() {
 
 	generateCmd.MarkFlagRequired("username")
 	generateCmd.MarkFlagRequired("token")
-	generateCmd.MarkFlagRequired("profile")
 }
 
 func run(cmd *cobra.Command, args []string) error {

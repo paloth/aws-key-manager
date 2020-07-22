@@ -11,7 +11,8 @@ import (
 func TestGenerate(t *testing.T) {
 	cmd := &cobra.Command{}
 
-	result := run(cmd, []string{"user"})
+	result := runGenerate(cmd, []string{})
+	t.Logf("%s", result)
 	assert.Error(t, result)
 
 	result = run(cmd, []string{""})
