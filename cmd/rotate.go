@@ -35,8 +35,8 @@ var rotateCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(rotateCmd)
 
-	generateCmd.Flags().StringP("profile", "p", "default", "AWS user profile (Must be in the aws credentials file)")
-	generateCmd.Flags().BoolP("", "y", false, "Validate the key rotation without prompt")
+	rotateCmd.Flags().StringP("profile", "p", "default", "AWS user profile (Must be in the aws credentials file)")
+	rotateCmd.Flags().BoolP("yes", "y", false, "Validate the key rotation without prompt")
 
 }
 
