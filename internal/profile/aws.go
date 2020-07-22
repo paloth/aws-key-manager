@@ -42,3 +42,19 @@ func GetAwsSession(profile string, user string, token string) sts.GetSessionToke
 
 	return *session
 }
+
+func checkAccessKeyAge() error {
+	return nil
+}
+
+func createNewAccessKey() error {
+	return nil
+}
+
+func deleteOldAccessKey() error {
+	return nil
+}
+
+func deactivateOldAccessKey() error {
+	return nil
+}
