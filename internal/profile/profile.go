@@ -15,10 +15,10 @@ const (
 )
 
 var (
-	home        *string
-	config      *configparser.ConfigParser
-	profileList []string
-	reToken     = regexp.MustCompile(`[0-9]{6}`)
+	home    string
+	config  *configparser.ConfigParser
+	err     error
+	reToken = regexp.MustCompile(`[0-9]{6}`)
 )
 
 func CheckToken(token string) error {
@@ -28,29 +28,29 @@ func CheckToken(token string) error {
 	return fmt.Errorf("The token %s must be composed by six digits", token)
 }
 
-func getHomeValue() (*string, error) {
-	home, err := os.UserHomeDir()
+func getHomeValue() error {
+	home, err = os.UserHomeDir()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return &home, nil
+	return nil
 }
 
-func getConfig() (*configparser.ConfigParser, error) {
-	home, err := getHomeValue()
+func getConfig() error {
+	err := getHomeValue()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	cfg, err := configparser.NewConfigParserFromFile(*home + credentialFile)
+	config, err = configparser.NewConfigParserFromFile(home + credentialFile)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return cfg, nil
+	return nil
 }
 
 func CheckProfile(profile string) error {
-	config, err := getConfig()
+	err = getConfig()
 	if err != nil {
 		return err
 	}
@@ -81,7 +81,7 @@ func WriteConfigFile(profile string, session *sts.GetSessionTokenOutput) error {
 	config.Set(profile+"-tmp", "aws_default_region", "eu-west-1")
 
 	//Write profile in file
-	err := config.SaveWithDelimiter(*home+credentialFile, "=")
+	err := config.SaveWithDelimiter(home+credentialFile, "=")
 	if err != nil {
 		return err
 	}
