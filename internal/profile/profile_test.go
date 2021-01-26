@@ -1,7 +1,6 @@
 package profile
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -15,5 +14,5 @@ func TestCheckToken(t *testing.T) {
 	assert.NotNil(t, result)
 
 	result = CheckToken("1234")
-	assert.Equal(t, result, fmt.Errorf("The token 1234 must be composed by six digits"), "error")
+	assert.Error(t, result, "The token 1234 must be composed by six digits")
 }
