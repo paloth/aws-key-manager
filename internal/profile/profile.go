@@ -68,6 +68,22 @@ func CheckProfile(profile string) error {
 	return fmt.Errorf("The profile %s is not present in your configuration file", profile)
 }
 
+func getOldAccessKey(profile string) (string, error) {
+	var oldAccessKey string
+
+	err := CheckProfile(profile)
+	if err != nil {
+		return "", err
+	}
+
+	oldAccessKey, err = config.Get(profile, "aws_access_key_id")
+	if err != nil {
+		return "", err
+	}
+
+	return oldAccessKey, nil
+}
+
 func WriteConfigFile(profile string, session *sts.GetSessionTokenOutput) error {
 	if exists := !config.HasSection(profile + "-tmp"); exists {
 		fmt.Println("Profile " + profile + "-tmp does not exists.")
