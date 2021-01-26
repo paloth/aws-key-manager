@@ -9,8 +9,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/sts"
 )
 
-func GetAwsSession(profile string, user string, token string) sts.GetSessionTokenOutput {
-	awsSession, err := session.NewSessionWithOptions(session.Options{
+func awsSession(profile string) *session.Session {
+	session, err := session.NewSessionWithOptions(session.Options{
 		Profile: profile,
 	})
 	if err != nil {
@@ -18,7 +18,12 @@ func GetAwsSession(profile string, user string, token string) sts.GetSessionToke
 			fmt.Println(awsErr)
 		}
 	}
-	svcSts := sts.New(awsSession)
+
+	return session
+}
+
+func GetAwsSession(profile string, user string, token string) sts.GetSessionTokenOutput {
+	svcSts := sts.New(awsSession(profile))
 
 	identity, err := svcSts.GetCallerIdentity(&sts.GetCallerIdentityInput{})
 	if err != nil {
