@@ -6,10 +6,11 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/sts"
 )
 
-func awsSession(profile string) *session.Session {
+func AwsSession(profile string) *session.Session {
 	session, err := session.NewSessionWithOptions(session.Options{
 		Profile: profile,
 	})
@@ -23,7 +24,7 @@ func awsSession(profile string) *session.Session {
 }
 
 func GetAwsSession(profile string, user string, token string) sts.GetSessionTokenOutput {
-	svcSts := sts.New(awsSession(profile))
+	svcSts := sts.New(AwsSession(profile))
 
 	identity, err := svcSts.GetCallerIdentity(&sts.GetCallerIdentityInput{})
 	if err != nil {
@@ -43,4 +44,13 @@ func GetAwsSession(profile string, user string, token string) sts.GetSessionToke
 		}
 	}
 	return *session
+}
+
+func CreateNewAccess(session *iam.IAM, profile string, user *string) (iam.CreateAccessKeyOutput, error) {
+	newAccessKey, err := session.CreateAccessKey(&iam.CreateAccessKeyInput{UserName: user})
+	if err != nil {
+		return *newAccessKey, err
+	}
+
+	return *newAccessKey, nil
 }
