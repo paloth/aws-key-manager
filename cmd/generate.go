@@ -23,8 +23,12 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
+	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/paloth/aws-key-manager/internal/profile"
+	"github.com/paloth/aws-key-manager/internal/psession"
 	"github.com/spf13/cobra"
 )
 
@@ -49,37 +53,37 @@ func init() {
 func execGenerate(cmd *cobra.Command, args []string) error {
 
 	//Check user name entry
-	userName, err := cmd.Flags().GetString("username")
-	if err != nil {
-		return err
-	}
+	userName, _ := cmd.Flags().GetString("username")
 	if userName == "" {
 		return fmt.Errorf("User name cannot be empty! Please provide a user name")
 	}
 
 	//Check token entry
-	userToken, err := cmd.Flags().GetString("token")
-	if err != nil {
-		return err
-	}
-	err = profile.CheckToken(userToken)
+	userToken, _ := cmd.Flags().GetString("token")
+	err := profile.CheckToken(&userToken)
 	if err != nil {
 		return err
 	}
 
 	//Check profile entry
-	userProfile, err := cmd.Flags().GetString("profile")
-	if err != nil {
-		return err
-	}
-	err = profile.CheckProfile(userProfile)
+	userProfile, _ := cmd.Flags().GetString("profile")
+	err = profile.CheckProfile(&userProfile)
 	if err != nil {
 		return err
 	}
 
-	session := profile.GetAwsSession(userProfile, userName, userToken)
+	awsSession, err := session.NewSessionWithOptions(session.Options{
+		Profile: userProfile,
+	})
+	if err != nil {
+		if awsErr, ok := err.(awserr.Error); ok {
+			log.Println(awsErr)
+		}
+	}
 
-	err = profile.WriteConfigFile(userProfile, &session)
+	session := psession.GetTmpSession(&awsSession, &userName, &userToken)
+
+	err = profile.WriteConfigFile(&userProfile, &session)
 	if err != nil {
 		return err
 	}
